@@ -101,6 +101,7 @@ function JoinForm({ code, onJoined }: { code: string; onJoined: (id: string) => 
 function Play({ code, playerId }: { code: string; playerId: string }) {
   const { view, error } = usePartyPoll<PlayerView>(code, playerId);
   const [picked, setPicked] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
   const remaining = useCountdown(view?.questionStartedAt ?? null, view?.secondsPerQuestion ?? 20);
 
   // Reset the local pick when a new question starts.
@@ -128,6 +129,31 @@ function Play({ code, playerId }: { code: string; playerId: string }) {
     setPicked(choice);
     const r = await postParty(code, "answer", { playerId, choice });
     if (!r.ok) setPicked(null); // let them retry if it didn't stick
+  }
+
+  async function share() {
+    if (!view?.me) return;
+    const medals = ["🥇", "🥈", "🥉"];
+    const podium = view.top
+      .slice(0, 3)
+      .map((r, i) => `${medals[i]} ${r.name} — ${r.score}`)
+      .join("\n");
+    const text = `Cachaí Party 🎉\nTerminé #${view.me.rank} de ${view.playersCount} con ${view.me.score} puntos.\n\n${podium}\n\nJuega en cachai: ${typeof window !== "undefined" ? window.location.origin : "https://chile-trivia.vercel.app"}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch {
+      /* user cancelled — fall through */
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -226,7 +252,13 @@ function Play({ code, playerId }: { code: string; playerId: string }) {
               ))}
             </div>
           </div>
-          <Link href="/" className="mt-8 text-sm text-red-600 hover:underline dark:text-red-400">
+          <button
+            onClick={share}
+            className="mt-8 w-full rounded-xl bg-red-600 py-3.5 text-base font-semibold text-white transition hover:bg-red-700 active:scale-[0.99]"
+          >
+            {copied ? "¡Copiado! 📋" : "Compartir resultado"}
+          </button>
+          <Link href="/" className="mt-4 text-sm text-red-600 hover:underline dark:text-red-400">
             Volver al juego diario
           </Link>
         </div>

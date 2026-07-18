@@ -11,7 +11,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Cachaí — el trivia diario de Chile",
     description: "Cinco preguntas al día sobre lo más chileno. ¿Cuánto cachái?",
+    type: "website",
+    locale: "es_CL",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cachaí — el trivia diario de Chile",
+    description: "Cinco preguntas al día sobre lo más chileno. ¿Cuánto cachái?",
+  },
+  // Installed-PWA experience on iOS.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cachaí",
+  },
+};
+
+export const viewport = {
+  themeColor: "#dc2626",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
