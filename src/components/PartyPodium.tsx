@@ -92,7 +92,15 @@ function Row({ rank, name, score, run, champion }: { rank: number; name: string;
   );
 }
 
-export default function PartyPodium({ leaderboard }: { leaderboard: Standing[] }) {
+export default function PartyPodium({
+  leaderboard,
+  title = "🏆 ¡Resultados finales!",
+  showNewGameLink = true,
+}: {
+  leaderboard: Standing[];
+  title?: string;
+  showNewGameLink?: boolean;
+}) {
   const rows = leaderboard.slice(0, 5);
   // Reveal bottom-to-top: `revealed` counts how many rows (from the last) show.
   const [revealed, setRevealed] = useState(0);
@@ -107,7 +115,7 @@ export default function PartyPodium({ leaderboard }: { leaderboard: Standing[] }
   return (
     <div className="relative pt-10 text-center">
       {championShown && <Confetti />}
-      <h1 className="text-3xl font-black">🏆 ¡Resultados finales!</h1>
+      <h1 className="text-3xl font-black">{title}</h1>
       <div className="mt-8 flex flex-col gap-2">
         {rows.map((r, i) => {
           // Row i (rank i+1) becomes visible once the reveal reaches it, counting
@@ -116,14 +124,14 @@ export default function PartyPodium({ leaderboard }: { leaderboard: Standing[] }
           return <Row key={r.id} rank={i + 1} name={r.name} score={r.score} run={run} champion={i === 0 && championShown} />;
         })}
       </div>
-      <Link
+      {showNewGameLink && <Link
         href="/party"
         className={`mt-10 inline-block rounded-xl bg-neutral-900 px-6 py-3 font-semibold text-white transition-opacity duration-500 dark:bg-white dark:text-neutral-900 ${
           championShown ? "opacity-100" : "opacity-0"
         }`}
       >
         Nueva partida
-      </Link>
+      </Link>}
     </div>
   );
 }

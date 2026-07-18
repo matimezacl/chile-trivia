@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { addLeague, getLeagues, getPlayer, loadGame, setPlayerName, syncResultToLeagues } from "@/lib/client";
+import PartyPodium from "@/components/PartyPodium";
 
 interface StandingRow {
   playerId: string;
@@ -10,14 +11,36 @@ interface StandingRow {
   total: number;
   played: number;
   todayCorrect: number | null;
+  weekPoints: number;
+  weekPlayed: number;
+}
+
+interface Champion {
+  week: number;
+  label: string;
+  playerId: string;
+  name: string;
+  points: number;
+}
+
+interface PodiumEntry {
+  playerId: string;
+  name: string;
+  points: number;
 }
 
 interface LeagueData {
   id: string;
   name: string;
   day: number;
+  week: number;
+  weekLabel: string;
   standings: StandingRow[];
+  champions: Champion[];
+  lastWeekPodium: { week: number; label: string; top: PodiumEntry[] } | null;
 }
+
+const seenChampionKey = (leagueId: string, week: number) => `ct:seen-champion:${leagueId}:${week}`;
 
 export default function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -28,6 +51,7 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [me, setMe] = useState("");
+  const [reveal, setReveal] = useState<{ week: number; label: string; top: PodiumEntry[] } | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch(`/api/leagues/${id}`);
@@ -56,6 +80,21 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
       void syncResultToLeagues(league.day, game.results).then(refresh);
     }
   }, [league, isMember, id, refresh]);
+
+  // First-visit-after-Monday reveal: if there's a fresh champion for last week
+  // that this browser hasn't seen yet, and the player is a member, play the
+  // animated podium once.
+  useEffect(() => {
+    if (!league?.lastWeekPodium || !isMember) return;
+    const key = seenChampionKey(league.id, league.lastWeekPodium.week);
+    if (localStorage.getItem(key)) return;
+    setReveal(league.lastWeekPodium);
+  }, [league, isMember]);
+
+  function dismissReveal() {
+    if (reveal && league) localStorage.setItem(seenChampionKey(league.id, reveal.week), "1");
+    setReveal(null);
+  }
 
   async function join() {
     const pname = playerName.trim();
@@ -99,14 +138,46 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
     return <main className="mx-auto max-w-xl px-5 py-16 text-center text-neutral-400">Cargando…</main>;
   }
 
+  // Weekly leader = the first player with any weekly points (all-time sort
+  // shouldn't crown someone who didn't play this week).
+  const weekLeader = [...league.standings]
+    .filter((s) => s.weekPlayed > 0)
+    .sort((a, b) => b.weekPoints - a.weekPoints || a.name.localeCompare(b.name))[0];
+
   return (
     <main className="mx-auto max-w-xl px-5 pb-16">
+      {reveal && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-5 backdrop-blur-sm"
+          onClick={dismissReveal}
+        >
+          <div
+            className="mt-6 w-full max-w-md rounded-2xl bg-white p-5 dark:bg-neutral-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-center text-sm font-semibold uppercase tracking-wide text-neutral-400">
+              {reveal.label}
+            </p>
+            <PartyPodium
+              title="🏆 Campeón de la semana"
+              showNewGameLink={false}
+              leaderboard={reveal.top.map((r) => ({ id: r.playerId, name: r.name, score: r.points }))}
+            />
+            <button
+              onClick={dismissReveal}
+              className="mx-auto mt-2 block rounded-xl border border-neutral-300 px-5 py-2 text-sm font-medium hover:bg-neutral-50 dark:border-neutral-600 dark:hover:bg-neutral-800"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{league.name}</h1>
           <p className="text-sm text-neutral-500">
-            {league.standings.length} {league.standings.length === 1 ? "jugador" : "jugadores"} · Cachaí #
-            {league.day + 1}
+            {league.standings.length} {league.standings.length === 1 ? "jugador" : "jugadores"} · Cachaí #{league.day + 1}
           </p>
         </div>
         <button
@@ -139,13 +210,32 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
+      {/* This week's leader */}
+      <section className="mt-6 rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800">
+        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Esta semana</p>
+        {weekLeader ? (
+          <div className="mt-1 flex items-baseline gap-2">
+            <span className="text-2xl">👑</span>
+            <div className="flex-1">
+              <p className="text-lg font-bold">{weekLeader.name}</p>
+              <p className="text-xs text-neutral-500">Va primero con {weekLeader.weekPoints} puntos</p>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-1 text-sm text-neutral-500">Nadie ha jugado esta semana todavía.</p>
+        )}
+        <p className="mt-2 text-xs text-neutral-400">{league.weekLabel} · el ganador se corona el lunes</p>
+      </section>
+
+      {/* Standings — now with weekly + all-time columns */}
       <table className="mt-6 w-full text-sm">
         <thead>
           <tr className="border-b border-neutral-200 text-left text-neutral-500 dark:border-neutral-700">
             <th className="py-2 font-medium">#</th>
             <th className="py-2 font-medium">Jugador</th>
             <th className="py-2 text-center font-medium">Hoy</th>
-            <th className="py-2 text-right font-medium">Puntos</th>
+            <th className="py-2 text-right font-medium">Semana</th>
+            <th className="py-2 text-right font-medium">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -166,7 +256,8 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
                   <span className="text-red-600 dark:text-red-400">{row.todayCorrect}/5</span>
                 )}
               </td>
-              <td className="py-2.5 text-right tabular-nums">{row.total}</td>
+              <td className="py-2.5 text-right tabular-nums">{row.weekPoints}</td>
+              <td className="py-2.5 text-right font-semibold tabular-nums">{row.total}</td>
             </tr>
           ))}
         </tbody>
@@ -176,7 +267,26 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
         Cada acierto suma según su dificultad: Fácil +1, Media +2, Difícil +4.
       </p>
 
-      <Link href="/" className="mt-6 inline-block text-sm text-red-600 hover:underline dark:text-red-400">
+      {/* Champion history */}
+      {league.champions.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-400">Campeones semanales</h2>
+          <ul className="mt-2 divide-y divide-neutral-100 dark:divide-neutral-800">
+            {league.champions.map((c) => (
+              <li key={c.week} className="flex items-center gap-3 py-2.5 text-sm">
+                <span className="text-lg">🏆</span>
+                <div className="flex-1">
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-xs text-neutral-400">{c.label}</p>
+                </div>
+                <span className="font-bold tabular-nums text-red-600 dark:text-red-400">{c.points} pts</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <Link href="/" className="mt-8 inline-block text-sm text-red-600 hover:underline dark:text-red-400">
         ← Juego de hoy
       </Link>
     </main>

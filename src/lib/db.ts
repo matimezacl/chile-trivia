@@ -13,6 +13,13 @@ export interface DayResult {
   at: number;
 }
 
+export interface WeekChampion {
+  playerId: string;
+  name: string;
+  points: number; // total points earned by the champion that week
+  crownedAt: number;
+}
+
 export interface League {
   id: string;
   name: string;
@@ -20,6 +27,9 @@ export interface League {
   members: Record<string, LeagueMember>;
   // results[day][playerId]
   results: Record<string, Record<string, DayResult>>;
+  // Frozen snapshots of past weekly winners, keyed by week number. Populated
+  // lazily the first time the standings endpoint is called after a week ends.
+  weekChampions?: Record<string, WeekChampion>;
 }
 
 interface Store {

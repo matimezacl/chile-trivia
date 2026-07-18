@@ -8,7 +8,8 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = { 1: 1, 2: 2, 3: 4 
 
 // Day 0 = launch day. Uses the player's local calendar date so the puzzle rolls
 // over at their midnight, just like the word game.
-const EPOCH = new Date(2026, 6, 17).getTime();
+export const EPOCH_DATE = new Date(2026, 6, 17);
+const EPOCH = EPOCH_DATE.getTime();
 
 export function dayNumber(now: Date = new Date()): number {
   const local = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
