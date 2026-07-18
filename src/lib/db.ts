@@ -108,9 +108,21 @@ class FileStore implements Store {
 
 let store: Store | null = null;
 
+// Different Vercel Redis integrations inject different variable names
+// (REDIS_URL, KV_URL, UPSTASH_REDIS_URL…). Accept any redis:// connection
+// string so leagues/party work regardless of which integration was attached.
+function resolveRedisUrl(): string | undefined {
+  const direct = process.env.REDIS_URL || process.env.KV_URL || process.env.UPSTASH_REDIS_URL;
+  if (direct) return direct;
+  for (const [k, v] of Object.entries(process.env)) {
+    if (v && /^rediss?:\/\//.test(v) && /redis|kv/i.test(k)) return v;
+  }
+  return undefined;
+}
+
 export function getStore(): Store {
   if (!store) {
-    const url = process.env.REDIS_URL;
+    const url = resolveRedisUrl();
     store = url ? new RedisStore(url) : new FileStore();
   }
   return store;
