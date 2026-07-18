@@ -25,6 +25,9 @@ export interface League {
 interface Store {
   get(id: string): Promise<League | null>;
   set(league: League): Promise<void>;
+  // Generic JSON-string KV, used by party rooms. Optional TTL in seconds.
+  kvGet(key: string): Promise<string | null>;
+  kvSet(key: string, value: string, ttlSeconds?: number): Promise<void>;
 }
 
 // Production: standard Redis over TCP via REDIS_URL (injected by the Vercel
@@ -51,6 +54,16 @@ class RedisStore implements Store {
   async set(league: League): Promise<void> {
     await (await this.connected()).set(`cachai:league:${league.id}`, JSON.stringify(league));
   }
+
+  async kvGet(key: string): Promise<string | null> {
+    return (await this.connected()).get(key);
+  }
+
+  async kvSet(key: string, value: string, ttlSeconds?: number): Promise<void> {
+    const client = await this.connected();
+    if (ttlSeconds) await client.set(key, value, { EX: ttlSeconds });
+    else await client.set(key, value);
+  }
 }
 
 // Local development: JSON files under .data/ (gitignored).
@@ -72,6 +85,24 @@ class FileStore implements Store {
   async set(league: League): Promise<void> {
     await fs.mkdir(this.dir, { recursive: true });
     await fs.writeFile(this.file(league.id), JSON.stringify(league, null, 2));
+  }
+
+  private kvDir = path.join(process.cwd(), ".data", "kv");
+  private kvFile(key: string) {
+    return path.join(this.kvDir, `${key.replace(/[^a-z0-9:_-]/gi, "_")}.json`);
+  }
+
+  async kvGet(key: string): Promise<string | null> {
+    try {
+      return await fs.readFile(this.kvFile(key), "utf8");
+    } catch {
+      return null;
+    }
+  }
+
+  async kvSet(key: string, value: string): Promise<void> {
+    await fs.mkdir(this.kvDir, { recursive: true });
+    await fs.writeFile(this.kvFile(key), value);
   }
 }
 

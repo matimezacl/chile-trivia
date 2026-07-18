@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Game from "@/components/Game";
 import LeaguePanel from "@/components/LeaguePanel";
 
@@ -16,6 +17,17 @@ export default function Home() {
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:p-8">
         <Game />
       </section>
+
+      <Link
+        href="/party"
+        className="mt-4 flex items-center justify-between rounded-2xl bg-red-600 px-6 py-4 text-white transition hover:bg-red-700"
+      >
+        <span>
+          <span className="block text-lg font-semibold">Modo fiesta 🎉</span>
+          <span className="block text-sm text-red-100">Juega en vivo con amigos, cada uno en su teléfono</span>
+        </span>
+        <span className="text-2xl">→</span>
+      </Link>
 
       <LeaguePanel />
 
