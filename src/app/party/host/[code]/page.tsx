@@ -6,6 +6,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { CATEGORY_LABEL, DIFFICULTY_LABEL } from "@/lib/questions";
 import type { HostView } from "@/lib/party";
 import { getHostId, postParty, useCountdown, usePartyPoll } from "@/lib/partyClient";
+import PartyPodium from "@/components/PartyPodium";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -40,7 +41,7 @@ export default function HostPage({ params }: { params: Promise<{ code: string }>
       {view.status === "lobby" && <Lobby code={code} hostId={hostId!} view={view} />}
       {view.status === "question" && <QuestionStage code={code} hostId={hostId!} view={view} />}
       {view.status === "reveal" && <RevealStage code={code} hostId={hostId!} view={view} />}
-      {view.status === "ended" && <Podium view={view} />}
+      {view.status === "ended" && <PartyPodium leaderboard={view.leaderboard} />}
     </main>
   );
 }
@@ -233,31 +234,3 @@ function Leaderboard({ rows }: { rows: { id: string; name: string; score: number
   );
 }
 
-function Podium({ view }: { view: HostView }) {
-  const top = view.leaderboard.slice(0, 5);
-  const medals = ["🥇", "🥈", "🥉"];
-  return (
-    <div className="pt-10 text-center">
-      <h1 className="text-3xl font-black">🏆 ¡Resultados finales!</h1>
-      <div className="mt-8 flex flex-col gap-2">
-        {top.map((r, i) => (
-          <div
-            key={r.id}
-            className={`flex items-center gap-3 rounded-xl px-5 py-4 ${
-              i === 0
-                ? "bg-red-600 text-white"
-                : "bg-neutral-100 dark:bg-neutral-800/70"
-            }`}
-          >
-            <span className="w-9 text-2xl">{medals[i] ?? i + 1}</span>
-            <span className="flex-1 text-left text-lg font-semibold">{r.name}</span>
-            <span className="text-lg font-black tabular-nums">{r.score}</span>
-          </div>
-        ))}
-      </div>
-      <Link href="/party" className="mt-10 inline-block rounded-xl bg-neutral-900 px-6 py-3 font-semibold text-white dark:bg-white dark:text-neutral-900">
-        Nueva partida
-      </Link>
-    </div>
-  );
-}
