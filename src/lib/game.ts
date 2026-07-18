@@ -1,6 +1,10 @@
-import { QUESTIONS, type Question } from "./questions";
+import { QUESTIONS, type Difficulty, type Question } from "./questions";
 
 export const QUESTIONS_PER_DAY = 5;
+
+// Points earned for answering a question correctly, by difficulty. Harder
+// questions are worth more — the "bonus" for depth. A missed question is 0.
+export const DIFFICULTY_POINTS: Record<Difficulty, number> = { 1: 1, 2: 2, 3: 4 };
 
 // Day 0 = launch day. Uses the player's local calendar date so the puzzle rolls
 // over at their midnight, just like the word game.
@@ -63,10 +67,21 @@ export function questionsForDay(day: number): Question[] {
   return out;
 }
 
-// League points: reward a perfect run, then scale down with each miss.
-// 5/5 = 10, 4 = 7, 3 = 5, 2 = 3, 1 = 1, 0 = 0.
-export function pointsForScore(correct: number): number {
-  return [0, 1, 3, 5, 7, 10][correct] ?? 0;
+// League points for a day = sum of the difficulty value of each question the
+// player got right. Computed from the day's questions so it can't be forged by
+// the client. `results[i]` is whether question i (in questionsForDay order) was
+// answered correctly.
+export function pointsForResults(day: number, results: boolean[]): number {
+  const qs = questionsForDay(day);
+  return results.reduce((sum, ok, i) => {
+    const q = qs[i];
+    return ok && q ? sum + DIFFICULTY_POINTS[q.difficulty] : sum;
+  }, 0);
+}
+
+// The maximum points available on a given day (all five correct).
+export function maxPointsForDay(day: number): number {
+  return questionsForDay(day).reduce((sum, q) => sum + DIFFICULTY_POINTS[q.difficulty], 0);
 }
 
 export function shareGrid(results: boolean[], day: number): string {

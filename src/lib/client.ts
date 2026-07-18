@@ -109,8 +109,10 @@ export function addLeague(league: JoinedLeague) {
   write("ct:leagues", leagues);
 }
 
-// Push today's finished result to every joined league. Server ignores duplicates.
-export async function syncResultToLeagues(day: number, correct: number) {
+// Push today's finished result to every joined league. The server derives the
+// score and difficulty-weighted points from `results`, so it can't be forged.
+// Server ignores duplicates.
+export async function syncResultToLeagues(day: number, results: boolean[]) {
   const player = getPlayer();
   const leagues = getLeagues();
   if (!leagues.length) return;
@@ -119,7 +121,7 @@ export async function syncResultToLeagues(day: number, correct: number) {
       fetch(`/api/leagues/${l.id}/results`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId: player.id, day, correct }),
+        body: JSON.stringify({ playerId: player.id, day, results }),
       })
     )
   );

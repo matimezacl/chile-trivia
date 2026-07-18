@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CATEGORY_LABEL, type Question } from "@/lib/questions";
-import { QUESTIONS_PER_DAY, dayNumber, questionsForDay, shareGrid } from "@/lib/game";
+import { CATEGORY_LABEL, DIFFICULTY_LABEL, type Difficulty, type Question } from "@/lib/questions";
+import {
+  DIFFICULTY_POINTS,
+  QUESTIONS_PER_DAY,
+  dayNumber,
+  pointsForResults,
+  questionsForDay,
+  shareGrid,
+} from "@/lib/game";
 import {
   getStats,
   loadGame,
@@ -43,7 +50,7 @@ export default function Game() {
       // right after the last answer, before hitting "Ver resultado".
       const correct = saved.results.filter(Boolean).length;
       setStats(recordFinish(d, correct, qs.length));
-      void syncResultToLeagues(d, correct);
+      void syncResultToLeagues(d, saved.results);
     } else if (saved) {
       setAnswers(saved.answers);
       setResults(saved.results);
@@ -91,7 +98,7 @@ export default function Game() {
     const correct = results.filter(Boolean).length;
     const s = recordFinish(day, correct, questions.length);
     setStats(s);
-    void syncResultToLeagues(day, correct);
+    void syncResultToLeagues(day, results);
   }
 
   async function share() {
@@ -134,9 +141,12 @@ export default function Game() {
   return (
     <div className="pop-in">
       <div className="mb-4 flex items-center justify-between text-sm">
-        <span className="rounded-full bg-neutral-100 px-3 py-1 font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
-          {CATEGORY_LABEL[q.category]}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-neutral-100 px-3 py-1 font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+            {CATEGORY_LABEL[q.category]}
+          </span>
+          <DifficultyBadge difficulty={q.difficulty} />
+        </div>
         <span className="tabular-nums text-neutral-400">
           {current + 1} / {questions.length}
         </span>
@@ -193,6 +203,20 @@ export default function Game() {
   );
 }
 
+function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
+  const cls =
+    difficulty === 1
+      ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400"
+      : difficulty === 2
+        ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
+        : "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400";
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${cls}`}>
+      {DIFFICULTY_LABEL[difficulty]} · +{DIFFICULTY_POINTS[difficulty]}
+    </span>
+  );
+}
+
 function Progress({
   total,
   results,
@@ -228,6 +252,7 @@ function Results({
   copied: boolean;
 }) {
   const score = results.filter(Boolean).length;
+  const points = useMemo(() => pointsForResults(day, results), [day, results]);
   const verdict = useMemo(() => verdictFor(score), [score]);
 
   return (
@@ -238,6 +263,9 @@ function Results({
         <span className="text-3xl font-bold text-neutral-400">/{QUESTIONS_PER_DAY}</span>
       </p>
       <p className="mt-1 text-lg font-semibold text-red-600 dark:text-red-400">{verdict}</p>
+      <p className="mt-1 text-sm text-neutral-500">
+        +{points} {points === 1 ? "punto" : "puntos"} para tu liga
+      </p>
 
       <div className="mt-6 flex justify-center gap-2 text-2xl">
         {results.map((ok, i) => (

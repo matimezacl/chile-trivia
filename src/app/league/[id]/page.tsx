@@ -53,8 +53,7 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
     if (!getLeagues().some((l) => l.id === id)) addLeague({ id, name: league.name });
     const game = loadGame(league.day);
     if (game?.done) {
-      const correct = game.results.filter(Boolean).length;
-      void syncResultToLeagues(league.day, correct).then(refresh);
+      void syncResultToLeagues(league.day, game.results).then(refresh);
     }
   }, [league, isMember, id, refresh]);
 
@@ -72,8 +71,7 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
       addLeague({ id, name: league.name });
       const game = loadGame(league.day);
       if (game?.done) {
-        const correct = game.results.filter(Boolean).length;
-        await syncResultToLeagues(league.day, correct);
+        await syncResultToLeagues(league.day, game.results);
       }
       await refresh();
     }
@@ -175,7 +173,7 @@ export default function LeaguePage({ params }: { params: Promise<{ id: string }>
       </table>
 
       <p className="mt-4 text-xs text-neutral-400">
-        Puntos por día: 5/5 = 10, 4 = 7, 3 = 5, 2 = 3, 1 = 1, 0 = 0.
+        Cada acierto suma según su dificultad: Fácil +1, Media +2, Difícil +4.
       </p>
 
       <Link href="/" className="mt-6 inline-block text-sm text-red-600 hover:underline dark:text-red-400">
