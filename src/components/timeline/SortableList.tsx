@@ -1,12 +1,14 @@
 "use client";
 
-import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors, closestCenter, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
-// A reusable vertical sortable list. Renders each item via a render prop so
-// the caller controls the card visuals; this component only handles drag.
+// A reusable vertical sortable list. The dragged card is rendered as an
+// overlay (in a portal) so the ghost follows the cursor exactly even when
+// the surrounding layout has padding, flex gaps or a sibling column — the
+// naive "translate in place" mode can drift right/down in those cases.
 
 export interface SortableListItem {
   id: string;
@@ -23,15 +25,22 @@ export function SortableList<T extends SortableListItem>({
   renderItem: (item: T, args: { index: number; isDragging: boolean }) => ReactNode;
   disabled?: boolean;
 }) {
-  // Small activation distance so accidental taps aren't treated as drags on
-  // mobile — matters because the whole card is grabbable, not a handle.
+  const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } })
   );
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+  const activeIndex = activeId ? items.findIndex((i) => i.id === activeId) : -1;
+  const activeItem = activeIndex >= 0 ? items[activeIndex] : null;
+
+  function handleDragStart(e: DragStartEvent) {
+    setActiveId(String(e.active.id));
+  }
+
+  function handleDragEnd(e: DragEndEvent) {
+    setActiveId(null);
+    const { active, over } = e;
     if (!over || active.id === over.id) return;
     const from = items.findIndex((i) => i.id === active.id);
     const to = items.findIndex((i) => i.id === over.id);
@@ -50,7 +59,13 @@ export function SortableList<T extends SortableListItem>({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveId(null)}
+    >
       <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2.5">
           {items.map((item, i) => (
@@ -60,6 +75,11 @@ export function SortableList<T extends SortableListItem>({
           ))}
         </div>
       </SortableContext>
+      <DragOverlay dropAnimation={null}>
+        {activeItem ? (
+          <div className="rotate-1">{renderItem(activeItem, { index: activeIndex, isDragging: true })}</div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }
@@ -70,10 +90,12 @@ function SortableWrapper({ id, children }: { id: string; children: (isDragging: 
     <div
       ref={setNodeRef}
       style={{
-        transform: CSS.Transform.toString(transform),
+        // Only apply the reorder transform to non-dragging items — the dragged
+        // card is rendered by DragOverlay and the original is dimmed in place.
+        transform: isDragging ? undefined : CSS.Transform.toString(transform),
         transition,
         touchAction: "none",
-        zIndex: isDragging ? 10 : "auto",
+        opacity: isDragging ? 0.35 : 1,
       }}
       {...attributes}
       {...listeners}
