@@ -31,12 +31,15 @@ export const viewport = {
   themeColor: "#dc2626",
 };
 
+import GameNav from "@/components/GameNav";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es-CL">
       <body
         className={`${geist.className} min-h-screen bg-white text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100`}
       >
+        <GameNav />
         {children}
       </body>
     </html>

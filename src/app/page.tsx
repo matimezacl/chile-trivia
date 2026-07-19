@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Game from "@/components/Game";
 import LeaguePanel from "@/components/LeaguePanel";
+import DailyStatus from "@/components/DailyStatus";
 
 export default function Home() {
   return (
@@ -18,16 +19,7 @@ export default function Home() {
         <Game />
       </section>
 
-      <Link
-        href="/timeline"
-        className="mt-4 flex items-center justify-between rounded-2xl border-2 border-neutral-200 bg-white px-6 py-4 transition hover:border-red-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-red-900"
-      >
-        <span>
-          <span className="block text-lg font-semibold">Cronos 🕰️</span>
-          <span className="block text-sm text-neutral-500">Ordena 5 hitos chilenos, del más antiguo al más nuevo</span>
-        </span>
-        <span className="text-2xl">→</span>
-      </Link>
+      <DailyStatus />
 
       <Link
         href="/party"
