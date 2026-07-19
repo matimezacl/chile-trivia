@@ -287,4 +287,57 @@ export const QUESTIONS: Question[] = [
   { id: 199, category: "ciencia", difficulty: 2, q: "El puma andino chileno es un pariente cercano de…", options: ["El león de montaña", "El leopardo", "El jaguar", "El tigre"], answer: 0, fact: 'Puma concolor tiene amplia distribución en las Américas.' },
   { id: 200, category: "ciencia", difficulty: 3, q: "El observatorio óptico infrarrojo europeo más grande, que se construye en el Cerro Armazones, se conoce como…", options: ["ELT (Extremely Large Telescope)", "VLT", "ALMA", "SOAR"], answer: 0, fact: 'El ELT contará con un espejo primario de 39 metros de diámetro.' },
   { id: 201, category: "ciencia", difficulty: 2, q: "La palma chilena, en peligro por la sobreexplotación de su savia, produce…", options: ["Miel de palma", "Aceite de girasol", "Ron", "Azúcar refinada"], answer: 0, fact: 'La miel de palma es un jarabe concentrado tradicional del valle central.' },
+
+  // ==== Batch 3 (2026-07-18): +33, authored per CONTENT.md ====
+
+  // ---- Modismos ----
+  { id: 204, category: "modismos", difficulty: 2, q: 'Los "cabros" son…', options: ["Los amigos o los jóvenes", "Los zapatos", "Los autos", "Los profesores"], answer: 0, fact: '"Vamos con los cabros" = salir con los amigos. También se usa para los niños.' },
+  { id: 205, category: "modismos", difficulty: 2, q: 'Una "luca" equivale a…', options: ["Mil pesos", "Cien pesos", "Un dólar", "Diez mil pesos"], answer: 0, fact: '"Cinco lucas" son cinco mil pesos. Vocabulario esencial de la feria.' },
+  { id: 206, category: "modismos", difficulty: 3, q: 'Una "gamba" en plata chilena son…', options: ["Cien pesos", "Mil pesos", "Diez pesos", "Un millón de pesos"], answer: 0, fact: 'Ojo: según el contexto, "una gamba" también puede ser cien mil pesos.' },
+  { id: 207, category: "modismos", difficulty: 1, q: 'Un "taco" en Santiago es…', options: ["Un atasco de tránsito", "Una comida mexicana", "Un zapato", "Un baile"], answer: 0, fact: 'El taco de las 6 de la tarde en la Alameda es institución nacional.' },
+  { id: 208, category: "modismos", difficulty: 2, q: 'La "micro" es…', options: ["El bus urbano", "Un computador", "Una tienda pequeña", "Una radio"], answer: 0, fact: 'Viene de "microbús". Perderla por segundos también es tradición.' },
+  { id: 209, category: "modismos", difficulty: 2, q: 'Una "fonda" es…', options: ["Un local de fiesta en Fiestas Patrias", "Una panadería", "Una cancha", "Una feria de libros"], answer: 0, fact: 'En fondas y ramadas se baila cueca y se toma terremoto cada 18 de septiembre.' },
+
+  // ---- Comida ----
+  { id: 210, category: "comida", difficulty: 2, q: 'La "paila marina" es…', options: ["Una sopa de mariscos", "Un postre", "Una ensalada", "Un tipo de pan"], answer: 0, fact: 'Clásico de mercado y caleta, famosa para "resucitar" después del carrete.' },
+  { id: 211, category: "comida", difficulty: 3, q: 'Los "calzones rotos" son…', options: ["Masas fritas con azúcar flor", "Ropa vieja", "Un guiso de carne", "Empanadas de queso"], answer: 0, fact: 'Dulce frito típico de invierno, compañero infaltable del té de la tarde.' },
+  { id: 212, category: "comida", difficulty: 2, q: 'Los "porotos granados" se comen típicamente en…', options: ["Verano", "Invierno", "Solo en Fiestas Patrias", "Semana Santa"], answer: 0, fact: 'Llevan porotos frescos, choclo y zapallo: cocina de enero y febrero.' },
+  { id: 213, category: "comida", difficulty: 3, q: 'La "chancaca" es…', options: ["Un dulce de caña para bañar sopaipillas", "Un tipo de pan", "Una bebida gaseosa", "Un queso del sur"], answer: 0, fact: 'Con salsa de chancaca las sopaipillas se vuelven "sopaipillas pasadas".' },
+  { id: 214, category: "comida", difficulty: 2, q: 'La "lúcuma" es…', options: ["Una fruta usada en postres y helados", "Una verdura", "Un pescado", "Una flor"], answer: 0, fact: 'El helado de manjar-lúcuma es de las combinaciones más chilenas que existen.' },
+  { id: 215, category: "comida", difficulty: 1, q: 'La "piscola" mezcla pisco con…', options: ["Bebida cola", "Jugo de naranja", "Leche", "Agua tónica"], answer: 0, fact: 'Tiene hasta día no oficial: el 8 de febrero se "celebra" la piscola.' },
+
+  // ---- Geografía ----
+  { id: 216, category: "geografía", difficulty: 2, q: "Los géiseres del Tatio están cerca de…", options: ["San Pedro de Atacama", "Puerto Varas", "Chillán", "La Serena"], answer: 0, fact: 'A más de 4.200 m, es uno de los campos geotérmicos más altos del mundo.' },
+  { id: 217, category: "geografía", difficulty: 2, q: "El Valle de la Luna es famoso por…", options: ["Sus paisajes desérticos de otro planeta", "Sus viñedos", "Sus bosques nativos", "Su nieve eterna"], answer: 0, fact: 'Está en la cordillera de la Sal, a minutos de San Pedro de Atacama.' },
+  { id: 218, category: "geografía", difficulty: 3, q: "El Salar de Atacama es clave para la producción mundial de…", options: ["Litio", "Cobre", "Plata", "Salitre"], answer: 0, fact: 'Chile concentra algunas de las mayores reservas de litio del planeta.' },
+  { id: 219, category: "geografía", difficulty: 3, q: "La Portada, el arco de piedra sobre el mar, está frente a…", options: ["Antofagasta", "Valparaíso", "Arica", "Puerto Montt"], answer: 0, fact: 'El monumento natural La Portada es el símbolo de Antofagasta.' },
+  { id: 220, category: "geografía", difficulty: 2, q: "La Isla Magdalena, en Magallanes, es famosa por su colonia de…", options: ["Pingüinos", "Lobos marinos", "Ballenas", "Flamencos"], answer: 0, fact: 'Miles de pingüinos de Magallanes anidan ahí cada temporada.' },
+
+  // ---- Fútbol y deporte ----
+  { id: 221, category: "fútbol", difficulty: 1, q: "Marcelo Ríos destacó en el deporte del…", options: ["Tenis", "Fútbol", "Boxeo", "Ciclismo"], answer: 0, fact: 'El "Chino" Ríos fue número 1 del ranking ATP en 1998.' },
+  { id: 222, category: "fútbol", difficulty: 3, q: "El apodo del tenista Fernando González era…", options: ["El Bombardero de La Reina", "El Matador", "El Cóndor", "El Zurdo de Oro"], answer: 0, fact: 'Su derecha demoledora le dio el apodo; ganó oro en dobles en Atenas 2004.' },
+  { id: 223, category: "fútbol", difficulty: 2, q: "Nicolás Massú ganó sus dos oros olímpicos en…", options: ["Atenas 2004", "Sídney 2000", "Pekín 2008", "Londres 2012"], answer: 0, fact: 'Singles y dobles en la misma edición: hazaña única del tenis chileno.' },
+
+  // ---- Música ----
+  { id: 224, category: "música", difficulty: 1, q: "El instrumento de cuerdas típico de la música andina es el…", options: ["Charango", "Violín", "Arpa", "Banjo"], answer: 0, fact: 'Nacido en el altiplano, suena en Inti-Illimani e Illapu.' },
+  { id: 225, category: "música", difficulty: 3, q: "José Alfredo Fuentes, ídolo de los 60, era conocido como…", options: ["El Pollo", "El Puma", "El Zorro", "El León"], answer: 0, fact: '"El Pollo" Fuentes llenaba teatros con "Te perdí".' },
+  { id: 226, category: "música", difficulty: 2, q: "La fiesta del norte con diabladas y bailes religiosos es…", options: ["La Tirana", "La Vendimia", "El Tapati", "La Pampilla"], answer: 0, fact: 'Cada julio, decenas de miles peregrinan a La Tirana, en Tarapacá.' },
+
+  // ---- Cultura ----
+  { id: 227, category: "cultura", difficulty: 2, q: 'La "Pampilla" de Coquimbo es famosa por…', options: ["Sus celebraciones masivas del 18", "Un festival de cine", "Una carrera de autos", "Su carnaval de invierno"], answer: 0, fact: 'Miles acampan en la Pampilla durante las Fiestas Patrias.' },
+  { id: 228, category: "cultura", difficulty: 3, q: 'El festival "Tapati" se celebra en…', options: ["Rapa Nui", "Chiloé", "Valparaíso", "Arica"], answer: 0, fact: 'Cada febrero, Rapa Nui compite en deportes y artes ancestrales.' },
+  { id: 229, category: "cultura", difficulty: 3, q: "El cómic futbolero chileno creado por Guido Vallejos es…", options: ["Barrabases", "Mampato", "Condorito", "Ogú"], answer: 0, fact: 'Barrabases, el equipo infantil de fútbol, apareció en 1954.' },
+
+  // ---- Historia ----
+  { id: 230, category: "historia", difficulty: 3, q: "El arquitecto italiano que diseñó La Moneda fue…", options: ["Joaquín Toesca", "Emilio Jecquier", "Josué Smith Solar", "Juan Herrera"], answer: 0, fact: 'Toesca también dejó su huella en los tajamares del río Mapocho.' },
+  { id: 231, category: "historia", difficulty: 3, q: 'El barco "Winnipeg", que trajo refugiados españoles a Chile, fue gestionado por…', options: ["Pablo Neruda", "Gabriela Mistral", "Vicente Huidobro", "Nicanor Parra"], answer: 0, fact: 'Neruda organizó el viaje desde Francia en 1939; llegaron más de 2.000 personas a Valparaíso.' },
+  { id: 232, category: "historia", difficulty: 2, q: "Las papas nativas con decenas de variedades son patrimonio agrícola de…", options: ["Chiloé", "Atacama", "Rapa Nui", "El Valle del Elqui"], answer: 0, fact: 'Chiloé es considerado uno de los centros de origen de la papa.' },
+
+  // ---- Ciencia ----
+  { id: 233, category: "ciencia", difficulty: 2, q: "El pingüino que anida en las costas del norte y centro de Chile es el de…", options: ["Humboldt", "Emperador", "Adelia", "Rey"], answer: 0, fact: 'Debe su nombre a la corriente fría que le trae su alimento.' },
+  { id: 234, category: "ciencia", difficulty: 3, q: 'El "picaflor de Juan Fernández" es notable por ser…', options: ["Endémico del archipiélago y en peligro crítico", "El ave más grande de Chile", "Un ave migratoria del Ártico", "Un ave nocturna"], answer: 0, fact: 'Solo vive en la isla Robinson Crusoe; quedan pocos miles.' },
+
+  // ---- Cine y TV ----
+  { id: 235, category: "tv", difficulty: 2, q: '"Cachureos" era un programa de TV…', options: ["Infantil con canciones", "De cocina", "De deportes", "De política"], answer: 0, fact: 'Marcelo Hernández y el Gato Juanito marcaron a generaciones desde 1983.' },
+  { id: 236, category: "tv", difficulty: 3, q: 'La teleserie "Sucupira" se basó en la obra del dramaturgo…', options: ["Dias Gomes", "Gabriel García Márquez", "Mario Vargas Llosa", "Jorge Amado"], answer: 0, fact: 'TVN adaptó "El bien amado" del brasileño Dias Gomes a un balneario chileno.' },
 ];
