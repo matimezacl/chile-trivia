@@ -127,3 +127,109 @@ export function shareTimeline(results: boolean[], day: number): string {
   const squares = results.map((ok) => (ok ? "🟩" : "🟥")).join("");
   return `Cachaí Cronos #${day + 1} — ${score}/${EVENTS_PER_DAY} 🕰️🇨🇱\n${squares}\n\nhttps://chile-trivia.vercel.app/timeline`;
 }
+
+// ==== Expert mode: 3 rounds, insert cards into a growing timeline ====
+
+export const EXPERT_ROUNDS = 3;
+export const EXPERT_CARDS_PER_ROUND = 5;
+// Points per correct placement scale up per round: harder to slot into a
+// longer timeline, so the reward is bigger.
+export const EXPERT_ROUND_POINTS: [number, number, number] = [1, 2, 3];
+export const EXPERT_MAX_SCORE =
+  EXPERT_ROUND_POINTS.reduce((s, p) => s + p * EXPERT_CARDS_PER_ROUND, 0);
+
+// Draw the full 15 events for a day's expert challenge from a separate ring
+// so it never repeats the same-day 5 from the basic Cronos. Guarantees 15
+// distinct years so every insertion has an unambiguous correct position.
+const EXPERT_RING = seededShuffle(EVENTS, 0xa3c11d);
+
+export function expertDrawForDay(day: number): TimelineEvent[] {
+  const total = EXPERT_ROUNDS * EXPERT_CARDS_PER_ROUND;
+  const n = EXPERT_RING.length;
+  const start = (day * total) % n;
+  const out: TimelineEvent[] = [];
+  const years = new Set<number>();
+  for (let step = 0; step < n && out.length < total; step++) {
+    const e = EXPERT_RING[(start + step) % n];
+    if (years.has(e.year)) continue;
+    years.add(e.year);
+    out.push(e);
+  }
+  return out;
+}
+
+// Split the daily draw into 3 rounds, each shuffled deterministically per day
+// so the hand order doesn't leak information (order in the array doesn't imply
+// chronology).
+export function expertRoundCards(day: number, round: number): TimelineEvent[] {
+  const all = expertDrawForDay(day);
+  const start = round * EXPERT_CARDS_PER_ROUND;
+  const slice = all.slice(start, start + EXPERT_CARDS_PER_ROUND);
+  return seededShuffle(slice, day * 104729 + round * 251 + 7);
+}
+
+// Given a chronologically-sorted `existing` timeline (event ids) and a new
+// event id, return the correct index the new event should be inserted at.
+export function correctInsertIndex(existing: number[], newId: number): number {
+  const byId = new Map(EVENTS.map((e) => [e.id, e]));
+  const target = byId.get(newId);
+  if (!target) return 0;
+  let i = 0;
+  for (const id of existing) {
+    const e = byId.get(id);
+    if (!e || e.year > target.year || (e.year === target.year && e.id > target.id)) break;
+    i++;
+  }
+  return i;
+}
+
+// Score one round of expert placements. `existing` is the state BEFORE the
+// round; `submission` maps hand-card id → the position (index into the merged
+// timeline) the player put it at. Return per-card correctness, points, and the
+// timeline AFTER the round with all cards merged into their correct positions
+// (whether or not the player was right — the timeline stays accurate).
+export function scoreExpertRound(
+  existing: number[],
+  submission: { id: number; playerIndex: number }[],
+  round: number
+): { correct: boolean[]; points: number; merged: number[] } {
+  // What the player thinks the timeline looks like: sort submissions by index
+  // and interleave with the existing cards in their order.
+  const playerTimeline = insertAll(existing, submission);
+
+  // What the timeline SHOULD look like once these cards are placed correctly.
+  const truthTimeline = [...existing];
+  for (const s of submission) {
+    const idx = correctInsertIndex(truthTimeline, s.id);
+    truthTimeline.splice(idx, 0, s.id);
+  }
+
+  const correct = submission.map((s) => {
+    const playerPos = playerTimeline.indexOf(s.id);
+    const truthPos = truthTimeline.indexOf(s.id);
+    return playerPos === truthPos;
+  });
+
+  const points = correct.filter(Boolean).length * EXPERT_ROUND_POINTS[round];
+  return { correct, points, merged: truthTimeline };
+}
+
+// Rebuild the timeline the player produced by inserting each submission at
+// their chosen index. Submissions are applied in order of playerIndex so later
+// insertions don't shift earlier ones.
+function insertAll(existing: number[], submission: { id: number; playerIndex: number }[]): number[] {
+  const out = [...existing];
+  const sorted = [...submission].sort((a, b) => a.playerIndex - b.playerIndex);
+  for (const s of sorted) {
+    const clamped = Math.min(Math.max(0, s.playerIndex), out.length);
+    out.splice(clamped, 0, s.id);
+  }
+  return out;
+}
+
+export function shareExpert(perRoundCorrect: number[], totalPoints: number, day: number): string {
+  const rounds = perRoundCorrect
+    .map((c, i) => `R${i + 1}: ${"🟩".repeat(c)}${"🟥".repeat(EXPERT_CARDS_PER_ROUND - c)}`)
+    .join("\n");
+  return `Cachaí Cronos Experto #${day + 1} — ${totalPoints}/${EXPERT_MAX_SCORE} 🕰️🇨🇱\n${rounds}\n\nhttps://chile-trivia.vercel.app/timeline/experto`;
+}
