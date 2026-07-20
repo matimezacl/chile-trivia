@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { DndContext, DragOverlay, PointerSensor, TouchSensor, useDroppable, useDraggable, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { createPortal } from "react-dom";
 import {
   EVENTS,
   EXPERT_CARDS_PER_ROUND,
@@ -74,6 +75,10 @@ export default function TimelineExpertGame() {
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [stats, setStats] = useState<ExpertStats | null>(null);
   const [copied, setCopied] = useState(false);
+  // Portal target for the drag ghost (see SortableList: keeps position:fixed
+  // viewport-relative even when an ancestor carries a CSS transform).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const byId = useMemo(() => new Map(EVENTS.map((e) => [e.id, e])), []);
 
@@ -337,13 +342,17 @@ export default function TimelineExpertGame() {
           </div>
         )}
 
-        <DragOverlay dropAnimation={null}>
-          {activeCard ? (
-            <div className="rotate-1 rounded-xl border-2 border-red-500 bg-white px-4 py-3.5 text-sm font-medium shadow-xl ring-4 ring-red-200 dark:bg-neutral-900 dark:ring-red-950/60">
-              {activeCard.text}
-            </div>
-          ) : null}
-        </DragOverlay>
+        {mounted &&
+          createPortal(
+            <DragOverlay dropAnimation={null}>
+              {activeCard ? (
+                <div className="rotate-1 rounded-xl border-2 border-red-500 bg-white px-4 py-3.5 text-sm font-medium shadow-xl ring-4 ring-red-200 dark:bg-neutral-900 dark:ring-red-950/60">
+                  {activeCard.text}
+                </div>
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )}
       </DndContext>
 
       <button

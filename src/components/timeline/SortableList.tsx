@@ -3,7 +3,8 @@
 import { DndContext, DragOverlay, PointerSensor, TouchSensor, useSensor, useSensors, closestCenter, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 // A reusable vertical sortable list. The dragged card is rendered as an
 // overlay (in a portal) so the ghost follows the cursor exactly even when
@@ -26,6 +27,11 @@ export function SortableList<T extends SortableListItem>({
   disabled?: boolean;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Portal target for the drag ghost: rendering it under document.body keeps
+  // position:fixed viewport-relative even if an ancestor has a CSS transform
+  // (a transformed ancestor becomes the containing block for fixed children).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 5 } })
@@ -75,11 +81,15 @@ export function SortableList<T extends SortableListItem>({
           ))}
         </div>
       </SortableContext>
-      <DragOverlay dropAnimation={null}>
-        {activeItem ? (
-          <div className="rotate-1">{renderItem(activeItem, { index: activeIndex, isDragging: true })}</div>
-        ) : null}
-      </DragOverlay>
+      {mounted &&
+        createPortal(
+          <DragOverlay dropAnimation={null}>
+            {activeItem ? (
+              <div className="rotate-1">{renderItem(activeItem, { index: activeIndex, isDragging: true })}</div>
+            ) : null}
+          </DragOverlay>,
+          document.body
+        )}
     </DndContext>
   );
 }

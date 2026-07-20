@@ -11,7 +11,9 @@
   }
 }
 .pop-in {
-  animation: pop-in 0.25s ease both;
+  /* No fill-mode: a retained transform (even scale(1)) turns the element into
+     the containing block for position:fixed children and breaks drag overlays. */
+  animation: pop-in 0.25s ease;
 }
 
 @keyframes shake {
@@ -38,7 +40,7 @@
 }
 
 .reveal {
-  animation: pop-in 0.2s ease both;
+  animation: pop-in 0.2s ease;
 }
 
 @keyframes year-reveal {
